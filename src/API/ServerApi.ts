@@ -4,7 +4,7 @@ import {Server} from '@overnightjs/core';
 import { GruposController } from './v1/Grupos/GruposController';
 import {TimingController} from './v1/Utils/TimeController';*/
 import * as fs from 'fs';
-import * as colors from 'colors';
+import {logService} from '../SERVICES/log/logService'
 import * as path from 'path';
 import * as express from 'express';
 
@@ -16,13 +16,16 @@ import {UserController} from './CONTROLLERS/V1/UserController';
 export class RestServer extends Server {
     private crt!:string;
     private key!:string;
+    private log:logService;
 
     constructor() {
         super(process.env.NODE_ENV==='development');
+        this.log=new logService();
         //Configuracion de los middleware
         this.app.use(bodyParser.json());
         this.app.use(bodyParser.urlencoded({extended:true}));
         this.app.use(express.static(path.resolve(__dirname,`../web`)));
+        this.setupSSLOptions();
         this.setupControllers();
     }
 
@@ -30,11 +33,13 @@ export class RestServer extends Server {
         if(process.env.REST_SERV_CERT_CRT && process.env.REST_SERV_CERT_KEY) {
             this.crt=fs.readFileSync(path.resolve(__dirname,process.env.REST_SERV_CERT_CRT?process.env.REST_SERV_CERT_CRT:"")).toString();
             this.key=fs.readFileSync(path.resolve(__dirname, process.env.REST_SERV_CERT_KEY?process.env.REST_SERV_CERT_KEY:"")).toString();
+            this.log.info('Se ha inciado el servidor con el protocolo SSL');
             return {
                 key:this.key,
                 cert:this.crt
-            };
+            };            
         } else {
+            this.log.warm('No se ha iniciado el servidor con el protocolo SSL');            
             return null;
         }
     }
@@ -48,7 +53,7 @@ export class RestServer extends Server {
 
     public start(port:number):void {
         this.app.listen(port,()=>{
-            console.log(colors.green.bgBlue(`Se ha iniciado el servidor en el puerto ${port}`));
+            this.log.info(`Se ha iniciado el servidor en el puerto ${port}`);
         });
     }
 }
