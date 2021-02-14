@@ -7,11 +7,17 @@ import * as fs from 'fs';
 import {logService} from '../SERVICES/log/logService'
 import * as path from 'path';
 import * as express from 'express';
+import * as https from 'https';
 
 //Importamos los controladores
 import {UserController} from './CONTROLLERS/V1/UserController';
 
 //Segun https://www.npmjs.com/package/@overnightjs/core
+
+export interface ICertData {
+    key:string,
+    cert:string
+}
 
 export class RestServer extends Server {
     private crt!:string;
@@ -29,17 +35,16 @@ export class RestServer extends Server {
         this.setupControllers();
     }
 
-    private setupSSLOptions():any {
+    private setupSSLOptions():ICertData {
         if(process.env.REST_SERV_CERT_CRT && process.env.REST_SERV_CERT_KEY) {
             this.crt=fs.readFileSync(path.resolve(__dirname,process.env.REST_SERV_CERT_CRT?process.env.REST_SERV_CERT_CRT:"")).toString();
             this.key=fs.readFileSync(path.resolve(__dirname, process.env.REST_SERV_CERT_KEY?process.env.REST_SERV_CERT_KEY:"")).toString();
-            this.log.info('Se ha inciado el servidor con el protocolo SSL');
             return {
                 key:this.key,
                 cert:this.crt
             };            
         } else {
-            this.log.warm('No se ha iniciado el servidor con el protocolo SSL');            
+                      
             return null;
         }
     }
@@ -52,8 +57,20 @@ export class RestServer extends Server {
     }
 
     public start(port:number):void {
-        this.app.listen(port,()=>{
-            this.log.info(`Se ha iniciado el servidor en el puerto ${port}`);
-        });
+        let datosCert:ICertData=this.setupSSLOptions();
+        if(datosCert!=null) {
+            https.createServer({
+                cert:datosCert.cert,
+                key:datosCert.key
+            },this.app).listen(port,()=>{
+                this.log.info(`Se ha iniciado el servidor en el puerto ${port}`);
+                this.log.info(`Se ha iniciado con el protocolo SSL`)
+            });
+        } else {
+            this.app.listen(port,()=>{
+                this.log.info(`Se ha iniciado el servidor en el puerto ${port}`);
+                this.log.warm('No se ha iniciado el servidor con el protocolo SSL');  
+            });
+        }
     }
 }

@@ -1,16 +1,19 @@
-import { ISecureRequest } from "@overnightjs/jwt";
-import { Response, NextFunction} from "express";
-/*import { GrupoPermiso } from "../models/GrupoPermiso";
-import { Usuario } from "../models/usuarios";
-import {Accion} from "../models/Accion";*/
+import { Request, Response, NextFunction} from "express";
+import {tokenService} from "../../SERVICES/secure/tokenService";
 
 export class PermisosMiddleWare {
-    static GetGroupsUserValidate(req:ISecureRequest, res:Response, next:NextFunction) {
-        if(req.payload.id) {            
-           
-        } else {
-            req.body.usuario={};
+    static GetUUIDUserToken(req:Request, res:Response, next:NextFunction) {
+        console.log(`TOKEN ${req.get('X-TOKEN')}`);
+        if(req.get('X-TOKEN')) {
+            let ts:tokenService=new tokenService();
+            let UUID=ts.Validar(req.get('X-TOKEN'));
+            req.headers['X-USER-UUID']=UUID;
             next();
+        } else {
+            res.status(401).json({
+                ok:false,
+                mensaje:'No se ha proporcionado el token de usuario'
+            });
         }
     }
 }
