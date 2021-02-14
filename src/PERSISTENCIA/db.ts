@@ -1,5 +1,9 @@
 import {Sequelize} from 'sequelize';
-import { logService } from '../SERVICES/log/logService'
+import {logService } from '../SERVICES/log/logService'
+
+//Imports de los modelos
+import {Usuario} from './models/Usuarios';
+import {UsuarioAutentificacion} from './models/UsuariosAutentificacion';
 
 
 export class db {
@@ -10,11 +14,15 @@ export class db {
     ) {
         this.IsConnected=false;
         this.log=new logService();
-        this.connection=new Sequelize(process.env.DB_DATABASE?process.env.DB_DATABASE:'circuitos', process.env.DB_USER?process.env.DB_USER:'root', process.env.DB_PASS?process.env.DB_PASS:'',{
+        this.connection=new Sequelize(process.env.DB_DATABASE?process.env.DB_DATABASE:'circuitos', process.env.DB_USER?process.env.DB_USER:'root', process.env.DB_PASS?process.env.DB_PASS:'',{            
             host:process.env.DB_HOST,
             dialect:process.env.DB_DIALECT==='mysql'?'mysql':'sqlite',
             logging:(...msg)=>log.dbLog(msg)
         });
+
+        //Añadimos los modelos
+        Usuario.Inicializar(this);
+        UsuarioAutentificacion.Inicializar(this);
     }
 
     connect() {

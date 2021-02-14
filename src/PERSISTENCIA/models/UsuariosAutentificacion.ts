@@ -1,58 +1,88 @@
-import {DataTypes,Model } from "sequelize/types";
-import {db} from "../db";
-import {Usuario} from './Usuarios';
+import {
+    Sequelize,
+    Model,
+    ModelDefined,
+    DataTypes,
+    HasManyGetAssociationsMixin,
+    HasManyAddAssociationMixin,
+    HasManyHasAssociationMixin,
+    Association,
+    HasManyCountAssociationsMixin,
+    HasManyCreateAssociationMixin,
+    Optional,
+  } from "sequelize";
 
-const cn=new db();
+import {db} from '../db';
 
-export class UsuarioAutentificacion extends Model {
-   
+// These are all the attributes in the User model
+interface IUsuarioAutentificacion {
+    uuid: string;
+    uuid_usuario:string;
+    tipo:string;
+    origen:string;
+    token?:string;
+    user?:string;
+    password?:string;
 }
 
-UsuarioAutentificacion.init({
-    UUID:{
-        type:DataTypes.UUID,
-        allowNull:false,
-        primaryKey:true,
-        field:"UUID"
-    },
-    USER_UUID:{
-        type:DataTypes.UUID,
-        allowNull:false,
-        field:"USER_UUID"
-    },
-    TIPO:{
-        type:DataTypes.ENUM('SIMPLE','OAUTH','API_KEY_FIX'),
-        defaultValue:'SIMPLE',
-        field:'TIPO_USAU'
-    },
-    ORIGEN:{
-        type:DataTypes.ENUM('BBDD','GOOGLE','FACEBOOK'),
-        defaultValue:'BBDD',
-        field:'ORIGEN_USAU'
-    },
-    TOKEN:{
-        type:DataTypes.STRING(255),
-        allowNull:true,
-        defaultValue:null,
-        field:'TOKEN_USAU'
-    },
-    USER:{
-        type:DataTypes.STRING(255),
-        defaultValue:null,
-        allowNull:true,
-        field:'USER_USAU'
-    },
-    PASS:{
-        type:DataTypes.STRING(255),
-        defaultValue:null,
-        allowNull:true,
-        field:'PASS_USAU'
-    }
-},{
-    sequelize:cn.connection,
-    tableName:"GEN_SECU_USAU_USERS_AUTH",
-    charset:"utf-8",
-    comment:"Tabla donde se almacenan las credenciales y los tipos de autentificación que tiene un usuario"
-});
+interface IUsuarioCreated extends Optional<IUsuarioAutentificacion,"uuid"> {
 
-UsuarioAutentificacion.hasOne(Usuario);
+}
+
+export class UsuarioAutentificacion extends Model<IUsuarioAutentificacion,IUsuarioCreated> implements IUsuarioAutentificacion{
+    public uuid: string;
+    public uuid_usuario:string;
+    public tipo:string;
+    public origen:string;
+    public token?:string;
+    public user?:string;
+    public password?:string;
+
+   static Inicializar(cn:db) {
+        UsuarioAutentificacion.init({
+            uuid:{
+                type:DataTypes.UUID,            
+                allowNull:false,
+                primaryKey:true,
+                field:"UUID"
+            },
+            uuid_usuario:{
+                type:DataTypes.UUID,            
+                allowNull:false,
+                field:"UUID_USUA"
+            },
+            tipo:{
+                type:DataTypes.ENUM('BBDD','OAUTH'),
+                allowNull:false,
+                defaultValue:'BBDD',
+                field:"TIPO_USAU"
+            },
+            origen:{
+                type:DataTypes.ENUM('BBDD','OAUTH_GOOGLE','OAUTH_FACEBOOK'),
+                allowNull:false,
+                defaultValue:'BBDD',
+                field:"ORIGEN_USAU"
+            },
+            token:{
+                type:DataTypes.STRING(255),
+                allowNull:true,
+                field:"TOKEN_USAU"
+            },
+            user:{
+                type:DataTypes.STRING(255),
+                allowNull:true,
+                field:"USER_USAU"
+            },
+            password:{
+                type:DataTypes.STRING(255),
+                allowNull:true,
+                field:"PASS_USAU"
+            }
+        },{      
+            sequelize:cn.connection,  
+            tableName:"GEN_SECU_USAU_USERS_AUTH",
+            charset:"utf-8",
+            comment:"Tabla donde se almacenan las distintas credenciales de los usuarios"
+        })
+    }
+}
