@@ -26,6 +26,16 @@ export class db {
         }
     }
 
+    UpdateModel(forzar:boolean=false) {
+        if(forzar) {
+            this.connection.sync({
+                force:true
+            });
+        } else {
+            this.connection.sync({ alter: true });
+        }
+    }
+
     disconnect() {
         this.connection.close();
     }
