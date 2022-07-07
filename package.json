@@ -33,7 +33,7 @@
     "https": "^1.0.0",
     "jsonwebtoken": "^8.5.1",
     "mariadb": "^2.5.2",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "mysql2": "^2.2.5",
     "nodemon": "^2.0.7",
     "ntpclient": "^1.0.2",
