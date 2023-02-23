@@ -39,7 +39,7 @@
     "ntpclient": "^1.0.2",
     "pg": "^8.5.1",
     "pg-hstore": "^2.3.3",
-    "sequelize": "^6.5.0",
+    "sequelize": "^6.28.2",
     "tedious": "^11.0.3",
     "typescript": "^4.1.3"
   },
